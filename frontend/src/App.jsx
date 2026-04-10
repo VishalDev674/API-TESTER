@@ -1,12 +1,11 @@
 import { useState, useCallback } from 'react';
 import Layout from './components/Layout';
 import BentoGrid from './components/BentoGrid';
-import PingMatrix from './components/PingMatrix';
 import AIThoughtStream from './components/AIThoughtStream';
 import EndpointManager from './components/EndpointManager';
 import HealTimeline from './components/HealTimeline';
 import SystemMonitor from './components/SystemMonitor';
-import StressControl from './components/StressControl';
+import IncidentResponse from './components/IncidentResponse';
 import AnalyticsGraph from './components/AnalyticsGraph';
 import useWebSocket from './hooks/useWebSocket';
 import useStats from './hooks/useStats';
@@ -22,8 +21,6 @@ export default function App() {
     throttle_level: 'normal',
     shadow_interval: 10,
   });
-  const [lastStressPing, setLastStressPing] = useState(null);
-  const [stressResult, setStressResult] = useState(null);
   const [aiExpanded, setAiExpanded] = useState(false);
 
   const handleWSMessage = useCallback((msg) => {
@@ -51,17 +48,7 @@ export default function App() {
         setSystemMetrics(data);
         break;
 
-      case 'stress_ping':
-        setLastStressPing(data);
-        break;
-
-      case 'stress':
-        setStressResult(data);
-        if (data.status === 'completed') {
-            refreshStats();
-            window.dispatchEvent(new CustomEvent('refresh-endpoints'));
-        }
-        break;
+      // Stress channels removed — Incident Response panel auto-refreshes via 'refresh-endpoints' event
 
       case 'heals':
         refreshStats();
@@ -89,20 +76,19 @@ export default function App() {
 
       {/* Main Dashboard Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-        {/* Left Column — The Matrix + Endpoints */}
+        {/* Left Column — Incident Response (wide) */}
         <div className="lg:col-span-2 space-y-8">
-          <PingMatrix stressPings={lastStressPing} />
+          <IncidentResponse />
           <EndpointManager />
         </div>
 
-        {/* Right Column — AI Terminal + Stress */}
+        {/* Right Column — AI Terminal */}
         <div className="space-y-8">
           <AIThoughtStream 
             thoughts={thoughts} 
             expanded={aiExpanded}
             onToggleExpand={setAiExpanded}
           />
-          <StressControl stressResult={stressResult} />
         </div>
       </div>
 

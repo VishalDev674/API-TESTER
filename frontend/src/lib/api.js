@@ -61,23 +61,9 @@ const api = {
     return res.json();
   },
 
-  // Stress Test
-  async startStressTest(data = {}) {
-    const res = await fetch(`${API_BASE}/api/stress/start`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ concurrency: 500, ...data }),
-    });
-    return res.json();
-  },
-
-  async getStressStatus() {
-    const res = await fetch(`${API_BASE}/api/stress/status`);
-    return res.json();
-  },
-
-  async stopStressTest() {
-    const res = await fetch(`${API_BASE}/api/stress/stop`, { method: 'POST' });
+  // Incidents (Error → Resolution flow)
+  async getIncidents(limit = 20) {
+    const res = await fetch(`${API_BASE}/api/dashboard/incidents?limit=${limit}`);
     return res.json();
   },
 

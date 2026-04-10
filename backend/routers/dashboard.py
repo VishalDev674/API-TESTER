@@ -222,3 +222,84 @@ async def get_analytics(
             sum(1 for r in rows if r.success) / len(rows) * 100, 1
         ) if rows else 100,
     }
+
+
+@router.get("/incidents")
+async def get_incidents(
+    limit: int = Query(20, ge=1, le=100),
+    db: AsyncSession = Depends(get_db),
+):
+    """Get recent incidents with full error-to-resolution flow for the Incident Response panel."""
+    # Get recent failed pings
+    failed_pings = await db.execute(
+        select(PingResult)
+        .where(PingResult.success == False)
+        .order_by(PingResult.created_at.desc())
+        .limit(limit)
+    )
+    pings = failed_pings.scalars().all()
+
+    incidents = []
+    for ping in pings:
+        # Get the endpoint info
+        ep_result = await db.execute(
+            select(APIEndpoint).where(APIEndpoint.id == ping.endpoint_id)
+        )
+        endpoint = ep_result.scalar_one_or_none()
+
+        # Get associated heal events (within a 5-minute window after this ping)
+        heal_result = await db.execute(
+            select(HealEvent)
+            .where(
+                and_(
+                    HealEvent.endpoint_id == ping.endpoint_id,
+                    HealEvent.created_at >= ping.created_at,
+                    HealEvent.created_at <= ping.created_at + timedelta(minutes=5),
+                )
+            )
+            .order_by(HealEvent.created_at.asc())
+        )
+        heals = heal_result.scalars().all()
+
+        # Parse AI analysis from the heal event if available
+        ai_rca = None
+        for h in heals:
+            if h.ai_analysis:
+                try:
+                    import json
+                    ai_rca = json.loads(h.ai_analysis) if isinstance(h.ai_analysis, str) else h.ai_analysis
+                except (json.JSONDecodeError, TypeError):
+                    ai_rca = {"cause": h.ai_analysis, "severity": "unknown", "recommendation": "See details", "confidence": 0}
+                break
+
+        resolved = any(h.heal_result == "success" for h in heals)
+        resolution_step = next(
+            (h.heal_step for h in heals if h.heal_result == "success"), None
+        )
+
+        incidents.append({
+            "id": ping.id,
+            "endpoint_name": endpoint.name if endpoint else "Unknown",
+            "endpoint_url": endpoint.url if endpoint else "",
+            "method": endpoint.method if endpoint else "GET",
+            "status_code": ping.status_code,
+            "error_message": ping.error_message,
+            "response_time_ms": ping.response_time_ms,
+            "detected_at": ping.created_at.isoformat(),
+            "heal_steps": [
+                {
+                    "step": h.heal_step,
+                    "result": h.heal_result,
+                    "failure_type": h.failure_type,
+                    "ai_analysis": h.ai_analysis,
+                    "details": h.details,
+                    "timestamp": h.created_at.isoformat(),
+                }
+                for h in heals
+            ],
+            "ai_rca": ai_rca,
+            "resolved": resolved,
+            "resolution_step": resolution_step,
+        })
+
+    return incidents

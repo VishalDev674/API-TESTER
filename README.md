@@ -2,7 +2,7 @@
 
 > **"High-Tech, Low-Life" Autonomous Testing Engine**
 > 
-> *Shadow API* is a high-fidelity, AI-driven monitoring and stress-testing platform designed to identify, analyze, and autonomously repair API failures before they impact your users. Built with a "Cyberpunk" aesthetic and a high-performance backend.
+> *Shadow API* is a high-fidelity, AI-driven monitoring platform designed to identify, analyze, and autonomously repair API failures before they impact your users. Built with a "Cyberpunk" aesthetic and a high-performance backend.
 
 ---
 
@@ -14,7 +14,7 @@ Shadow API isn't just a monitoring tool—it's a self-healing neural network for
 
 - **The Matrix**: A high-performance HTML5 Canvas visualization rendering 500+ API nodes in real-time. Pulsing neon indicators provide immediate feedback on network health.
 - **Neural RCA Engine**: An AI-powered terminal that "thinks" in real-time, analyzing 500 Errors and autonomously recommending or applying fixes.
-- **Stress Simulator**: Inject load up to 500 concurrent users with a single click. Watch as your infrastructure reacts and the AI levels up to meet the demand.
+- **Incident Response**: Real-time error detection and resolution panel. Watch as the AI detects failures, performs Root Cause Analysis, and applies autonomous fixes — perfect for live demos.
 - **Telemetry Bar**: A sticky tactical footer providing micro-sparklines for CPU/RAM and active 'Shadow Threads'.
 
 ---
@@ -67,7 +67,7 @@ The terminal will provide the uplink URL (typically `http://localhost:5173`).
 Shadow API uses a **Bento Grid** layout system to organize tactical information:
 1. **Top Tier**: Real-time KPI stats (Success Rate, Latency, Active Heals).
 2. **The Grid**: The Matrix visualization and Node Registry.
-3. **Neural Link**: AI Thought Stream and Stress Controls.
+3. **Neural Link**: AI Thought Stream and Incident Response.
 4. **History**: Repair Protocols (Heal Timeline) and Hardware Telemetry.
 
 ---

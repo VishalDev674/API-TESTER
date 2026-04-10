@@ -21,11 +21,3 @@ export const COLORS = {
 };
 
 export const WS_URL = `ws://${window.location.hostname}:${window.location.port}/ws`;
-
-export const PING_MATRIX = {
-  COLS: 25,
-  ROWS: 20,
-  DOT_SIZE: 8,
-  DOT_GAP: 4,
-  TOTAL: 500,
-};
