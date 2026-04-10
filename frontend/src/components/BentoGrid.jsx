@@ -1,5 +1,5 @@
 import StatsCard from './StatsCard';
-import { Activity, CheckCircle, Wrench, Zap, Server, Clock, TrendingUp, Gauge } from 'lucide-react';
+import { Activity, CheckCircle, Wrench, Zap } from 'lucide-react';
 
 export default function BentoGrid({ stats }) {
   return (
@@ -25,7 +25,7 @@ export default function BentoGrid({ stats }) {
         value={stats.active_heals}
         subtitle={stats.active_heals > 0 ? 'Auto-healing in progress' : 'No active healing'}
         icon={Wrench}
-        color={stats.active_heals > 0 ? 'magenta' : 'blue'}
+        color={stats.active_heals > 0 ? 'purple' : 'cyan'}
         delay={2}
       />
       <StatsCard

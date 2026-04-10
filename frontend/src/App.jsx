@@ -23,6 +23,7 @@ export default function App() {
   });
   const [lastStressPing, setLastStressPing] = useState(null);
   const [stressResult, setStressResult] = useState(null);
+  const [aiExpanded, setAiExpanded] = useState(false);
 
   const handleWSMessage = useCallback((msg) => {
     const { channel, data, timestamp } = msg;
@@ -76,27 +77,31 @@ export default function App() {
   return (
     <Layout wsConnected={connected} stats={stats} systemMetrics={systemMetrics}>
       {/* Bento Grid Stats */}
-      <section className="mb-10">
+      <section className="mb-8">
         <BentoGrid stats={stats} />
       </section>
 
       {/* Main Dashboard Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 mb-10">
-        {/* Left Column - Ping Matrix + Stress Control */}
-        <div className="lg:col-span-2 space-y-10">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+        {/* Left Column — The Matrix + Endpoints */}
+        <div className="lg:col-span-2 space-y-8">
           <PingMatrix stressPings={lastStressPing} />
           <EndpointManager />
         </div>
 
-        {/* Right Column - AI Stream + System */}
-        <div className="space-y-10">
-          <AIThoughtStream thoughts={thoughts} />
+        {/* Right Column — AI Terminal + Stress */}
+        <div className="space-y-8">
+          <AIThoughtStream 
+            thoughts={thoughts} 
+            expanded={aiExpanded}
+            onToggleExpand={setAiExpanded}
+          />
           <StressControl stressResult={stressResult} />
         </div>
       </div>
 
       {/* Bottom Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <HealTimeline />
         <SystemMonitor metrics={systemMetrics} />
       </div>

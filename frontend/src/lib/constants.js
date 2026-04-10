@@ -1,16 +1,23 @@
+// === CYBERPUNK COLOR PALETTE ===
 export const COLORS = {
-  cyan: '#A7EF9E',
-  magenta: '#2e4a2e',
-  green: '#39ff14',
-  red: '#ff4d4d',
-  blue: '#A7EF9E',
-  yellow: '#f4d03f',
-  purple: '#27ae60',
-  dark: '#050507',
-  card: '#0a0a0f',
-  border: '#1a2e1a',
-  text: '#e0f0e0',
-  textDim: '#88a088',
+  // Neon Accents
+  green: '#00ff41',       // 200 OK — Neon Green
+  red: '#ff0a3c',         // 500 Errors — Cyber Red
+  purple: '#bf5af2',      // AI Thoughts — Electric Purple
+  cyan: '#00d4ff',        // Info / Links
+  yellow: '#ffd60a',      // Warnings
+  orange: '#ff6b2b',      // Stress / Load
+  pink: '#ff2d7b',        // Critical
+
+  // Surfaces
+  dark: '#0a0a0a',
+  card: '#0e0e14',
+  border: 'rgba(0, 255, 65, 0.12)',
+  
+  // Text
+  text: '#e8e8ec',
+  textDim: '#4a4a5a',
+  textSecondary: '#8b8b9a',
 };
 
 export const WS_URL = `ws://${window.location.hostname}:${window.location.port}/ws`;
