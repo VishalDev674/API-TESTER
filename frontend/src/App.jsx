@@ -74,22 +74,19 @@ export default function App() {
         <AnalyticsGraph />
       </section>
 
-      {/* Main Dashboard Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-        {/* Left Column — Incident Response (wide) */}
-        <div className="lg:col-span-2 space-y-8">
-          <IncidentResponse />
-          <EndpointManager />
-        </div>
+      {/* Incident Response — Full Width (Bigger) */}
+      <section className="mb-8">
+        <IncidentResponse />
+      </section>
 
-        {/* Right Column — AI Terminal */}
-        <div className="space-y-8">
-          <AIThoughtStream 
-            thoughts={thoughts} 
-            expanded={aiExpanded}
-            onToggleExpand={setAiExpanded}
-          />
-        </div>
+      {/* Network Mux + AI Terminal — Side by Side */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <EndpointManager />
+        <AIThoughtStream 
+          thoughts={thoughts} 
+          expanded={aiExpanded}
+          onToggleExpand={setAiExpanded}
+        />
       </div>
 
       {/* Bottom Row */}
