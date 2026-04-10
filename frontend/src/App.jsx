@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import Layout from './components/Layout';
+import Hero from './components/Hero';
 import BentoGrid from './components/BentoGrid';
 import AIThoughtStream from './components/AIThoughtStream';
 import EndpointManager from './components/EndpointManager';
@@ -81,6 +82,9 @@ export default function App() {
     <>
     <ManualAlertBanner alerts={manualAlerts} onDismiss={dismissAlert} />
     <Layout wsConnected={connected} stats={stats} systemMetrics={systemMetrics}>
+      {/* Hero Section */}
+      <Hero />
+
       {/* Bento Grid Stats */}
       <section className="mb-8">
         <BentoGrid stats={stats} manualAlerts={manualAlerts} />
