@@ -1,0 +1,366 @@
+@import "tailwindcss";
+
+/* ========================================
+   SHADOW API TESTER — Cyberpunk Theme
+   ======================================== */
+
+@theme {
+  --color-shadow-dark: #020202;
+  --color-shadow-darker: #000000;
+  --color-shadow-card: rgba(10, 10, 15, 0.7);
+  --color-shadow-border: rgba(167, 239, 158, 0.15);
+  --color-shadow-cyan: #A7EF9E;
+  --color-shadow-magenta: #1e3a1e;
+  --color-shadow-green: #39ff14;
+  --color-shadow-red: #ff4d4d;
+  --color-shadow-blue: #A7EF9E;
+  --color-shadow-yellow: #f4d03f;
+  --color-shadow-purple: #27ae60;
+  --color-shadow-muted: #2d382d;
+  --color-shadow-text: #ffffff;
+  --color-shadow-text-dim: #a0c0a0;
+  
+  --shadow-glow: 0 0 25px rgba(167, 239, 158, 0.2);
+  --shadow-glow-strong: 0 0 50px rgba(167, 239, 158, 0.3);
+}
+
+/* ========================================
+   Tactical Utility Classes
+   ======================================== */
+.clipped-corner {
+  clip-path: polygon(
+    12px 0, 100% 0, 
+    100% calc(100% - 12px), 
+    calc(100% - 12px) 100%, 
+    0 100%, 0 12px
+  );
+}
+
+.tactical-border {
+  position: relative;
+  border: 1px solid rgba(167, 239, 158, 0.15);
+}
+
+.tactical-border::before {
+  content: '';
+  position: absolute;
+  top: -1px; left: -1px; width: 10px; height: 10px;
+  border-top: 2px solid var(--color-shadow-cyan);
+  border-left: 2px solid var(--color-shadow-cyan);
+}
+
+.tactical-border::after {
+  content: '';
+  position: absolute;
+  bottom: -1px; right: -1px; width: 10px; height: 10px;
+  border-bottom: 2px solid var(--color-shadow-cyan);
+  border-right: 2px solid var(--color-shadow-cyan);
+}
+
+.badge-tactical {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 12px;
+  background: rgba(167, 239, 158, 0.05);
+  border: 1px solid rgba(167, 239, 158, 0.2);
+  color: var(--color-shadow-cyan);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  clip-path: polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px);
+}
+
+.glass-card {
+  position: relative;
+  background: linear-gradient(165deg, rgba(10, 10, 15, 0.9), rgba(2, 2, 5, 0.95));
+  border: 1px solid rgba(167, 239, 158, 0.12);
+  backdrop-filter: blur(32px);
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 
+    0 15px 50px -10px rgba(0, 0, 0, 0.8),
+    inset 0 1px 1px rgba(167, 239, 158, 0.05);
+}
+
+.glow-bloom {
+  filter: drop-shadow(0 0 4px var(--color-shadow-cyan)) drop-shadow(0 0 12px rgba(167, 239, 158, 0.3));
+}
+
+/* ========================================
+   Neon Glow Effects
+   ======================================== */
+.glow-cyan {
+  box-shadow: 0 0 15px rgba(167, 239, 158, 0.3), 0 0 45px rgba(167, 239, 158, 0.1);
+}
+
+.glow-green {
+  box-shadow: 0 0 15px rgba(57, 255, 20, 0.3), 0 0 45px rgba(57, 255, 20, 0.1);
+}
+
+.glow-red {
+  box-shadow: 0 0 15px rgba(255, 7, 58, 0.3), 0 0 45px rgba(255, 7, 58, 0.1);
+}
+
+.glow-magenta {
+  box-shadow: 0 0 15px rgba(46, 74, 46, 0.3), 0 0 45px rgba(46, 74, 46, 0.1);
+}
+
+.text-glow-cyan {
+  text-shadow: 0 0 10px rgba(167, 239, 158, 0.5), 0 0 30px rgba(167, 239, 158, 0.2);
+}
+
+.text-glow-green {
+  text-shadow: 0 0 10px rgba(57, 255, 20, 0.5), 0 0 30px rgba(57, 255, 20, 0.2);
+}
+
+/* ========================================
+   Animations
+   ======================================== */
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 5px rgba(167, 239, 158, 0.3); }
+  50% { box-shadow: 0 0 20px rgba(167, 239, 158, 0.6), 0 0 40px rgba(167, 239, 158, 0.2); }
+}
+
+@keyframes scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes typewriter {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.85; }
+}
+
+@keyframes borderPulse {
+  0%, 100% { border-color: rgba(167, 239, 158, 0.1); }
+  50% { border-color: rgba(167, 239, 158, 0.4); }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-flicker {
+  animation: flicker 4s ease-in-out infinite;
+}
+
+.animate-border-pulse {
+  animation: borderPulse 2s ease-in-out infinite;
+}
+
+/* Scanline overlay */
+.scanline-overlay::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+  background-size: 100% 4px, 3px 100%;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.1;
+}
+
+.vignette {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle, transparent 40%, rgba(0,0,0,0.8) 150%);
+  pointer-events: none;
+  z-index: 9998;
+}
+
+.terminal-cursor::after {
+  content: '_';
+  animation: flicker 1s step-end infinite;
+}
+
+/* ========================================
+   Bento Grid
+   ======================================== */
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+
+@media (max-width: 1200px) {
+  .bento-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 640px) {
+  .bento-grid { grid-template-columns: 1fr; }
+}
+
+/* ========================================
+   Ping Matrix Canvas
+   ======================================== */
+.ping-matrix-container {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(2, 2, 3, 0.8);
+  border: 1px solid rgba(167, 239, 158, 0.1);
+}
+
+/* ========================================
+   AI Thought Stream
+   ======================================== */
+.thought-stream {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  line-height: 1.6;
+  overflow-y: auto;
+  max-height: 400px;
+}
+
+.thought-stream .log-info { color: var(--color-shadow-cyan); }
+.thought-stream .log-warning { color: var(--color-shadow-yellow); }
+.thought-stream .log-error { color: var(--color-shadow-red); }
+.thought-stream .log-heal { color: var(--color-shadow-magenta); }
+.thought-stream .log-analysis { color: var(--color-shadow-green); }
+
+/* ========================================
+   Buttons
+   ======================================== */
+.btn-neon {
+  position: relative;
+  padding: 10px 24px;
+  background: transparent;
+  border: 1px solid var(--color-shadow-cyan);
+  color: var(--color-shadow-cyan);
+  font-family: 'Outfit', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.btn-neon:hover {
+  background: rgba(167, 239, 158, 0.1);
+  box-shadow: 0 0 20px rgba(167, 239, 158, 0.3), 0 0 60px rgba(167, 239, 158, 0.1);
+  transform: translateY(-1px);
+}
+
+.btn-neon:active {
+  transform: translateY(0);
+}
+
+.btn-danger {
+  border-color: var(--color-shadow-red);
+  color: var(--color-shadow-red);
+}
+
+.btn-danger:hover {
+  background: rgba(255, 7, 58, 0.1);
+  box-shadow: 0 0 20px rgba(255, 7, 58, 0.3);
+}
+
+.btn-storm {
+  padding: 16px 40px;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, rgba(167, 239, 158, 0.15), rgba(46, 74, 46, 0.15));
+  border: 2px solid transparent;
+  border-image: linear-gradient(135deg, var(--color-shadow-cyan), var(--color-shadow-magenta)) 1;
+  color: white;
+  border-radius: 0;
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+}
+
+.btn-storm:hover {
+  background: linear-gradient(135deg, rgba(167, 239, 158, 0.25), rgba(46, 74, 46, 0.25));
+  box-shadow: 0 0 40px rgba(167, 239, 158, 0.3), 0 0 80px rgba(46, 74, 46, 0.2);
+}
+
+/* ========================================
+   Gauge / Meter Styles
+   ======================================== */
+.gauge-ring {
+  fill: none;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.5s ease;
+}
+
+/* ========================================
+   Status Badges
+   ======================================== */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge-success {
+  background: rgba(57, 255, 20, 0.1);
+  border: 1px solid rgba(57, 255, 20, 0.3);
+  color: var(--color-shadow-green);
+}
+
+.badge-error {
+  background: rgba(255, 7, 58, 0.1);
+  border: 1px solid rgba(255, 7, 58, 0.3);
+  color: var(--color-shadow-red);
+}
+
+.badge-healing {
+  background: rgba(0, 191, 255, 0.1);
+  border: 1px solid rgba(0, 191, 255, 0.3);
+  color: var(--color-shadow-blue);
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.badge-warning {
+  background: rgba(255, 211, 0, 0.1);
+  border: 1px solid rgba(255, 211, 0, 0.3);
+  color: var(--color-shadow-yellow);
+}
+
+/* ========================================
+   Input Fields
+   ======================================== */
+.input-shadow {
+  background: rgba(10, 10, 15, 0.8);
+  border: 1px solid var(--color-shadow-border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: var(--color-shadow-text);
+  font-family: 'Outfit', sans-serif;
+  font-size: 14px;
+  transition: border-color 0.3s ease;
+  width: 100%;
+}
+
+.input-shadow:focus {
+  outline: none;
+  border-color: var(--color-shadow-cyan);
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.1);
+}
+
+.input-shadow::placeholder {
+  color: var(--color-shadow-muted);
+}
