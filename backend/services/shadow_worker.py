@@ -179,6 +179,14 @@ class ShadowWorker:
 
         # Trigger healing if failed (skip if already handled by schema healer)
         if not success and not (error_message or "").startswith("Schema mismatch"):
+            # Skip if this endpoint is already being healed (prevent parallel loops)
+            if endpoint.id in auto_healer.active_heals:
+                await ws_manager.broadcast("ai_thoughts", {
+                    "message": f"[GUARD] Skipping heal for [{endpoint.name}] — already in active healing pipeline.",
+                    "level": "info",
+                })
+                return
+
             failure_type = "timeout" if "timeout" in (error_message or "").lower() else \
                            "5xx" if status_code and status_code >= 500 else \
                            "connection_error"

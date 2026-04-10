@@ -1,10 +1,12 @@
 """
 Shadow API Tester — Auto-Healer
 3-step healing sequence: Retry -> Parameter Adjustment -> Mock Fallback
+Includes Circuit Breaker to prevent infinite healing loops.
 """
 import asyncio
 import httpx
 import json
+import time
 from typing import Optional, Dict, Any
 from datetime import datetime, timezone
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -15,11 +17,62 @@ from services.websocket_manager import ws_manager
 from config import settings
 
 
+# ── Circuit Breaker Configuration ──────────────────────────────────
+MAX_HEAL_ATTEMPTS = 3          # Max heal attempts per endpoint before cooldown
+HEAL_WINDOW_SECONDS = 300      # 5-minute sliding window for counting attempts
+COOLDOWN_SECONDS = 600         # 10-minute cooldown after circuit trips
+
+
 class AutoHealer:
     """Implements the 3-step auto-healing sequence for failed API pings."""
 
     def __init__(self):
         self.active_heals: Dict[int, str] = {}  # endpoint_id -> current_step
+        # Circuit Breaker state: endpoint_id -> list of timestamps of recent heal attempts
+        self._heal_history: Dict[int, list] = {}
+        # Cooldown tracking: endpoint_id -> cooldown_expiry_timestamp
+        self._cooldowns: Dict[int, float] = {}
+
+    def _is_circuit_open(self, endpoint_id: int) -> bool:
+        """Check if the circuit breaker has tripped for this endpoint."""
+        now = time.time()
+
+        # Check if endpoint is in cooldown
+        if endpoint_id in self._cooldowns:
+            if now < self._cooldowns[endpoint_id]:
+                return True  # Still in cooldown — circuit is OPEN, skip healing
+            else:
+                # Cooldown expired — reset circuit
+                del self._cooldowns[endpoint_id]
+                self._heal_history.pop(endpoint_id, None)
+                return False
+
+        # Count recent heal attempts within the sliding window
+        if endpoint_id in self._heal_history:
+            # Prune old entries outside the window
+            self._heal_history[endpoint_id] = [
+                t for t in self._heal_history[endpoint_id]
+                if now - t < HEAL_WINDOW_SECONDS
+            ]
+            if len(self._heal_history[endpoint_id]) >= MAX_HEAL_ATTEMPTS:
+                # Trip the circuit — enter cooldown
+                self._cooldowns[endpoint_id] = now + COOLDOWN_SECONDS
+                return True
+
+        return False
+
+    def _record_heal_attempt(self, endpoint_id: int):
+        """Record a heal attempt timestamp for the circuit breaker."""
+        if endpoint_id not in self._heal_history:
+            self._heal_history[endpoint_id] = []
+        self._heal_history[endpoint_id].append(time.time())
+
+    def get_cooldown_remaining(self, endpoint_id: int) -> Optional[float]:
+        """Returns seconds remaining in cooldown, or None if not in cooldown."""
+        if endpoint_id in self._cooldowns:
+            remaining = self._cooldowns[endpoint_id] - time.time()
+            return max(0, remaining) if remaining > 0 else None
+        return None
 
     async def heal(
         self,
@@ -31,8 +84,41 @@ class AutoHealer:
         response_body: Optional[str] = None,
         response_time_ms: Optional[float] = None,
     ) -> Dict[str, Any]:
-        """Execute the 3-step healing sequence."""
+        """Execute the 3-step healing sequence with circuit breaker protection."""
         endpoint_id = endpoint.id
+
+        # ── Circuit Breaker Check ──────────────────────────────────
+        if self._is_circuit_open(endpoint_id):
+            remaining = self.get_cooldown_remaining(endpoint_id)
+            mins = int((remaining or 0) // 60)
+            secs = int((remaining or 0) % 60)
+            await ws_manager.broadcast("ai_thoughts", {
+                "message": f"[CIRCUIT BREAKER] Healing SKIPPED for [{endpoint.name}] — "
+                           f"max {MAX_HEAL_ATTEMPTS} attempts reached. "
+                           f"Cooldown: {mins}m {secs}s remaining. Preventing infinite loop.",
+                "level": "warning",
+            })
+            # ── Send Manual Intervention Alert to Frontend ──
+            await ws_manager.broadcast("manual_alert", {
+                "endpoint_id": endpoint_id,
+                "endpoint_name": endpoint.name,
+                "failure_type": failure_type,
+                "status_code": status_code,
+                "error_message": error_message,
+                "attempts_exhausted": MAX_HEAL_ATTEMPTS,
+                "cooldown_remaining_seconds": int(remaining or 0),
+                "message": f"Auto-healing failed after {MAX_HEAL_ATTEMPTS} attempts. "
+                           f"Manual intervention required for [{endpoint.name}].",
+                "severity": "critical",
+            })
+            return {
+                "success": False,
+                "step": "circuit_breaker",
+                "error": f"Circuit breaker open — cooldown {mins}m remaining",
+            }
+
+        # Record this heal attempt
+        self._record_heal_attempt(endpoint_id)
         self.active_heals[endpoint_id] = "retry"
 
         await ws_manager.broadcast("heals", {
@@ -97,7 +183,19 @@ class AutoHealer:
         endpoint: APIEndpoint,
         actual_response: Any,
     ) -> Optional[Dict]:
-        """Handle schema mismatch healing."""
+        """Handle schema mismatch healing with circuit breaker protection."""
+        # Circuit breaker also applies to schema healing
+        if self._is_circuit_open(endpoint.id):
+            remaining = self.get_cooldown_remaining(endpoint.id)
+            mins = int((remaining or 0) // 60)
+            await ws_manager.broadcast("ai_thoughts", {
+                "message": f"[CIRCUIT BREAKER] Schema healing SKIPPED for [{endpoint.name}] — "
+                           f"cooldown {mins}m remaining.",
+                "level": "warning",
+            })
+            return None
+
+        self._record_heal_attempt(endpoint.id)
         self.active_heals[endpoint.id] = "schema_detect"
 
         new_schema = await schema_detector.detect_and_heal(

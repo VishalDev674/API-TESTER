@@ -14,7 +14,9 @@ Shadow API isn't just a monitoring tool—it's a self-healing neural network for
 
 - **The Matrix**: A high-performance HTML5 Canvas visualization rendering 500+ API nodes in real-time. Pulsing neon indicators provide immediate feedback on network health.
 - **Neural RCA Engine**: An AI-powered terminal that "thinks" in real-time, analyzing 500 Errors and autonomously recommending or applying fixes.
-- **Incident Response**: Real-time error detection and resolution panel. Watch as the AI detects failures, performs Root Cause Analysis, and applies autonomous fixes — perfect for live demos.
+- **Incident Response**: Real-time error detection and resolution panel. Watch as the AI detects failures, performs Root Cause Analysis, and applies autonomous fixes.
+- **Circuit Breaker**: A safety mechanism that prevents infinite healing loops by monitoring attempt frequency and forcing a cooldown when a fix isn't sticking.
+- **Manual Intervention System**: A high-priority alert system that triggers when autonomous healing fails, providing actionable insights for human operators.
 - **Telemetry Bar**: A sticky tactical footer providing micro-sparklines for CPU/RAM and active 'Shadow Threads'.
 
 ---

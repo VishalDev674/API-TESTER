@@ -1,7 +1,9 @@
 import StatsCard from './StatsCard';
-import { Activity, CheckCircle, Wrench, Zap } from 'lucide-react';
+import { Activity, CheckCircle, Wrench, Zap, AlertOctagon } from 'lucide-react';
 
-export default function BentoGrid({ stats }) {
+export default function BentoGrid({ stats, manualAlerts = [] }) {
+  const hasManualAlerts = manualAlerts.length > 0;
+
   return (
     <div className="bento-grid">
       <StatsCard
@@ -13,11 +15,11 @@ export default function BentoGrid({ stats }) {
         delay={0}
       />
       <StatsCard
-        title="Success Rate"
-        value={`${stats.success_rate}%`}
-        subtitle={stats.success_rate >= 99 ? 'All systems nominal' : 'Degraded performance'}
-        icon={CheckCircle}
-        color={stats.success_rate >= 95 ? 'green' : stats.success_rate >= 80 ? 'yellow' : 'red'}
+        title={hasManualAlerts ? "CRITICAL ALERTS" : "Success Rate"}
+        value={hasManualAlerts ? manualAlerts.length : `${stats.success_rate}%`}
+        subtitle={hasManualAlerts ? 'MANUAL INTERVENTION REQUIRED' : (stats.success_rate >= 99 ? 'All systems nominal' : 'Degraded performance')}
+        icon={hasManualAlerts ? AlertOctagon : CheckCircle}
+        color={hasManualAlerts ? 'red' : (stats.success_rate >= 95 ? 'green' : stats.success_rate >= 80 ? 'yellow' : 'red')}
         delay={1}
       />
       <StatsCard

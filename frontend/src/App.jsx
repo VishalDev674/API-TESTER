@@ -7,6 +7,7 @@ import HealTimeline from './components/HealTimeline';
 import SystemMonitor from './components/SystemMonitor';
 import IncidentResponse from './components/IncidentResponse';
 import AnalyticsGraph from './components/AnalyticsGraph';
+import ManualAlertBanner from './components/ManualAlertBanner';
 import useWebSocket from './hooks/useWebSocket';
 import useStats from './hooks/useStats';
 
@@ -22,6 +23,7 @@ export default function App() {
     shadow_interval: 10,
   });
   const [aiExpanded, setAiExpanded] = useState(false);
+  const [manualAlerts, setManualAlerts] = useState([]);
 
   const handleWSMessage = useCallback((msg) => {
     const { channel, data, timestamp } = msg;
@@ -55,6 +57,15 @@ export default function App() {
         window.dispatchEvent(new CustomEvent('refresh-endpoints'));
         break;
 
+      case 'manual_alert':
+        setManualAlerts((prev) => {
+          // Avoid duplicate alerts for the same endpoint
+          const exists = prev.find((a) => a.endpoint_id === data.endpoint_id);
+          if (exists) return prev;
+          return [...prev, { ...data, id: `${data.endpoint_id}-${Date.now()}` }];
+        });
+        break;
+
       default:
         break;
     }
@@ -62,11 +73,17 @@ export default function App() {
 
   const { connected } = useWebSocket(handleWSMessage);
 
+  const dismissAlert = useCallback((alertId) => {
+    setManualAlerts((prev) => prev.filter((a) => a.id !== alertId));
+  }, []);
+
   return (
+    <>
+    <ManualAlertBanner alerts={manualAlerts} onDismiss={dismissAlert} />
     <Layout wsConnected={connected} stats={stats} systemMetrics={systemMetrics}>
       {/* Bento Grid Stats */}
       <section className="mb-8">
-        <BentoGrid stats={stats} />
+        <BentoGrid stats={stats} manualAlerts={manualAlerts} />
       </section>
 
       {/* Performance Analytics Graph */}
@@ -95,5 +112,6 @@ export default function App() {
         <SystemMonitor metrics={systemMetrics} />
       </div>
     </Layout>
+    </>
   );
 }
