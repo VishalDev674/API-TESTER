@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
-import { Activity, Wifi, WifiOff } from 'lucide-react';
+import { Activity, Wifi, WifiOff, Shield, Hexagon } from 'lucide-react';
 import FaultyTerminal from './FaultyTerminal';
-import StatusBar from './StatusBar';
+import TelemetryBar from './TelemetryBar';
 
 export default function Layout({ children, wsConnected, stats, systemMetrics }) {
   return (
@@ -15,7 +15,7 @@ export default function Layout({ children, wsConnected, stats, systemMetrics }) 
         inset: 0,
         zIndex: 0,
         pointerEvents: 'none',
-        opacity: 0.7,
+        opacity: 0.5,
       }}>
         <FaultyTerminal
           scale={1.5}
@@ -30,55 +30,95 @@ export default function Layout({ children, wsConnected, stats, systemMetrics }) 
           chromaticAberration={0}
           dither={0}
           curvature={0.1}
-          tint="#A7EF9E"
+          tint="#00ff41"
           mouseReact
           mouseStrength={0.5}
           pageLoadAnimation
-          brightness={0.4}
+          brightness={0.3}
           style={{ pointerEvents: 'auto' }}
         />
       </div>
 
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-white/5 backdrop-blur-2xl bg-black/40">
-        <div className="max-w-[1600px] mx-auto px-10 py-6 flex items-center justify-between">
+      <header className="sticky top-0 z-50 border-b border-white/5" style={{
+        background: 'rgba(5, 5, 8, 0.85)',
+        backdropFilter: 'blur(30px) saturate(1.3)',
+      }}>
+        <div className="max-w-[1600px] mx-auto px-8 py-5 flex items-center justify-between">
           <motion.div
             className="flex items-center gap-5"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
           >
-            <div className="relative p-3 rounded-lg bg-shadow-cyan/5 border border-shadow-cyan/10">
-              <Activity size={24} className="text-shadow-cyan" />
-              <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-shadow-green rounded-full animate-pulse shadow-[0_0_10px_rgba(57,255,20,0.6)]" />
+            {/* Logo Icon */}
+            <div className="relative">
+              <div className="p-3 rounded-xl border border-white/5" style={{
+                background: 'rgba(0, 255, 65, 0.04)',
+              }}>
+                <Activity size={24} className="text-neon-green" style={{ color: '#00ff41' }} />
+              </div>
+              <div 
+                className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full animate-pulse"
+                style={{ 
+                  background: '#00ff41', 
+                  boxShadow: '0 0 12px rgba(0, 255, 65, 0.7)' 
+                }} 
+              />
             </div>
+
+            {/* Title */}
             <div>
-              <h1 className="text-2xl font-bold tracking-tighter text-white uppercase">
-                SHADOW<span className="text-shadow-cyan">API</span>
+              <h1 className="text-2xl font-bold tracking-tighter text-white uppercase" style={{ fontFamily: "'Outfit', sans-serif" }}>
+                SHADOW<span style={{ color: '#00ff41' }} className="text-glow-green">API</span>
               </h1>
-              <p className="text-[10px] font-mono text-shadow-green/60 tracking-[0.4em] uppercase font-bold">
-                Autonomous Testing Engine v2.0
+              <p className="text-[10px] font-mono tracking-[0.4em] uppercase font-bold" style={{ color: 'rgba(0, 255, 65, 0.5)' }}>
+                Autonomous Testing Engine v3.0
               </p>
             </div>
           </motion.div>
 
           <motion.div
-            className="flex items-center gap-8"
+            className="flex items-center gap-6"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.1, ease: "easeOut" }}
           >
+            {/* WebSocket Status */}
             <div className={`flex items-center gap-3 px-5 py-2 rounded-full border ${
-              wsConnected ? 'border-shadow-green/30 bg-shadow-green/10' : 'border-shadow-red/30 bg-shadow-red/10'
-            }`}>
-              <div className={`w-2 h-2 rounded-full ${wsConnected ? 'bg-shadow-green animate-pulse shadow-[0_0_8px_rgba(57,255,20,0.4)]' : 'bg-shadow-red'}`} />
-              <span className="text-[11px] font-bold font-mono tracking-widest" style={{ color: wsConnected ? '#39ff14' : '#ff4d4d' }}>
-                {wsConnected ? 'NETWORK: ACTIVE' : 'NETWORK: DISCONNECTED'}
+              wsConnected 
+                ? 'border-green-500/20' 
+                : 'border-red-500/20'
+            }`} style={{
+              background: wsConnected ? 'rgba(0, 255, 65, 0.06)' : 'rgba(255, 10, 60, 0.06)',
+            }}>
+              <div 
+                className={`w-2 h-2 rounded-full ${wsConnected ? 'animate-pulse' : ''}`}
+                style={{ 
+                  background: wsConnected ? '#00ff41' : '#ff0a3c',
+                  boxShadow: wsConnected 
+                    ? '0 0 10px rgba(0, 255, 65, 0.5)' 
+                    : '0 0 10px rgba(255, 10, 60, 0.5)' 
+                }} 
+              />
+              <span className="text-[11px] font-bold font-mono tracking-widest" style={{ color: wsConnected ? '#00ff41' : '#ff0a3c' }}>
+                {wsConnected ? 'UPLINK: ACTIVE' : 'UPLINK: SEVERED'}
               </span>
             </div>
 
+            {/* Shield Status */}
+            <div className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/5" style={{
+              background: 'rgba(191, 90, 242, 0.04)',
+            }}>
+              <Shield size={14} style={{ color: '#bf5af2' }} />
+              <span className="text-[10px] font-mono font-bold tracking-widest" style={{ color: '#bf5af2' }}>
+                AI: ARMED
+              </span>
+            </div>
+
+            {/* Date */}
             <div className="text-right hidden sm:block">
-              <p className="text-[11px] uppercase font-mono text-white/40 tracking-[0.2em]">
+              <p className="text-[11px] uppercase font-mono text-white/30 tracking-[0.2em]">
                 {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
               </p>
             </div>
@@ -87,11 +127,12 @@ export default function Layout({ children, wsConnected, stats, systemMetrics }) 
       </header>
 
       {/* Main Content */}
-      <main className="max-w-[1600px] mx-auto px-10 pt-12 pb-24 relative z-10">
+      <main className="max-w-[1600px] mx-auto px-8 pt-10 pb-28 relative z-10">
         {children}
       </main>
 
-      <StatusBar stats={stats} wsConnected={wsConnected} systemMetrics={systemMetrics} />
+      {/* Sticky Telemetry Bar */}
+      <TelemetryBar stats={stats} wsConnected={wsConnected} systemMetrics={systemMetrics} />
     </div>
   );
 }

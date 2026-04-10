@@ -2,65 +2,75 @@ import { motion } from 'framer-motion';
 
 export default function StatsCard({ title, value, subtitle, icon: Icon, color, delay = 0 }) {
   const colorMap = {
-    cyan: { text: '#A7EF9E', bg: 'rgba(167,239,158,0.06)', border: 'rgba(167,239,158,0.15)', glow: 'rgba(167,239,158,0.08)' },
-    green: { text: '#39ff14', bg: 'rgba(57,255,20,0.06)', border: 'rgba(57,255,20,0.15)', glow: 'rgba(57,255,20,0.08)' },
-    magenta: { text: '#2e4a2e', bg: 'rgba(46,74,46,0.06)', border: 'rgba(46,74,46,0.15)', glow: 'rgba(46,74,46,0.08)' },
-    red: { text: '#ff4d4d', bg: 'rgba(255,77,77,0.06)', border: 'rgba(255,77,77,0.15)', glow: 'rgba(255,77,77,0.08)' },
-    blue: { text: '#58d68d', bg: 'rgba(88,214,141,0.06)', border: 'rgba(88,214,141,0.15)', glow: 'rgba(88,214,141,0.08)' },
-    yellow: { text: '#f4d03f', bg: 'rgba(244,208,63,0.06)', border: 'rgba(244,208,63,0.15)', glow: 'rgba(244,208,63,0.08)' },
-    purple: { text: '#27ae60', bg: 'rgba(39,174,96,0.06)', border: 'rgba(39,174,96,0.15)', glow: 'rgba(39,174,96,0.08)' },
+    cyan: { text: '#00d4ff', bg: 'rgba(0,212,255,0.04)', border: 'rgba(0,212,255,0.12)', glow: '0 0 20px rgba(0,212,255,0.15)' },
+    green: { text: '#00ff41', bg: 'rgba(0,255,65,0.04)', border: 'rgba(0,255,65,0.12)', glow: '0 0 20px rgba(0,255,65,0.15)' },
+    red: { text: '#ff0a3c', bg: 'rgba(255,10,60,0.04)', border: 'rgba(255,10,60,0.12)', glow: '0 0 20px rgba(255,10,60,0.15)' },
+    purple: { text: '#bf5af2', bg: 'rgba(191,90,242,0.04)', border: 'rgba(191,90,242,0.12)', glow: '0 0 20px rgba(191,90,242,0.15)' },
+    yellow: { text: '#ffd60a', bg: 'rgba(255,214,10,0.04)', border: 'rgba(255,214,10,0.12)', glow: '0 0 20px rgba(255,214,10,0.15)' },
+    magenta: { text: '#ff2d7b', bg: 'rgba(255,45,123,0.04)', border: 'rgba(255,45,123,0.12)', glow: '0 0 20px rgba(255,45,123,0.15)' },
+    blue: { text: '#00d4ff', bg: 'rgba(0,212,255,0.04)', border: 'rgba(0,212,255,0.12)', glow: '0 0 20px rgba(0,212,255,0.15)' },
   };
 
   const c = colorMap[color] || colorMap.cyan;
 
   return (
     <motion.div
-      className="glass-card clipped-corner tactical-border p-8 relative overflow-hidden group"
-      initial={{ opacity: 0, y: 20, scale: 0.98 }}
+      className="glass-card bento-item p-7 relative overflow-hidden group"
+      initial={{ opacity: 0, y: 30, scale: 0.96 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ duration: 0.6, delay: delay * 0.1, ease: "easeOut" }}
-      whileHover={{ y: -6, transition: { duration: 0.2 } }}
+      transition={{ duration: 0.7, delay: delay * 0.1, ease: [0.16, 1, 0.3, 1] }}
+      whileHover={{ y: -4, transition: { duration: 0.25 } }}
     >
-      {/* Aurora Glow Overlay */}
-      <div className="absolute -inset-1 opacity-0 group-hover:opacity-20 transition-opacity duration-700 blur-3xl pointer-events-none"
-        style={{ background: `radial-gradient(circle at 50% 120%, ${c.text}, transparent 70%)` }}
+      {/* Hover Aura */}
+      <div 
+        className="absolute -inset-4 opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-3xl pointer-events-none"
+        style={{ background: `radial-gradient(circle at 50% 120%, ${c.text}15, transparent 60%)` }}
       />
       
-      {/* Background Micro-mesh */}
-      <div className="absolute inset-0 opacity-[0.03] pointer-events-none" 
-        style={{ backgroundImage: 'radial-gradient(circle, currentColor 1px, transparent 1px)', backgroundSize: '4px 4px', color: c.text }}
+      {/* Grid Micro-Pattern */}
+      <div 
+        className="absolute inset-0 opacity-[0.02] pointer-events-none grid-lines"
       />
 
       <div className="relative z-10">
-        <div className="flex items-center justify-between mb-4">
-          <span className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-70" style={{ color: c.text }}>
+        <div className="flex items-center justify-between mb-5">
+          <span 
+            className="text-[10px] font-bold tracking-[0.25em] uppercase"
+            style={{ color: c.text, opacity: 0.75 }}
+          >
             {title}
           </span>
           {Icon && (
-            <div className="p-2.5 rounded-lg border border-white/5 bg-white/[0.03]" style={{ color: c.text }}>
-              <Icon size={18} />
+            <div 
+              className="p-2.5 rounded-lg border border-white/5"
+              style={{ background: c.bg, color: c.text }}
+            >
+              <Icon size={16} />
             </div>
           )}
         </div>
 
         <motion.div
-          className="text-4xl font-black text-white mb-2 font-heading tracking-tighter"
+          className="text-4xl font-black text-white mb-2.5 tracking-tighter"
+          style={{ fontFamily: "'Outfit', sans-serif" }}
           key={value}
-          initial={{ opacity: 0, x: -10 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.4 }}
+          initial={{ opacity: 0, x: -10, filter: 'blur(4px)' }}
+          animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
+          transition={{ duration: 0.5 }}
         >
           {value}
         </motion.div>
 
         {subtitle && (
-          <p className="text-[10px] font-mono opacity-50 uppercase tracking-widest">{subtitle}</p>
+          <p className="text-[10px] font-mono uppercase tracking-[0.15em]" style={{ color: 'rgba(255,255,255,0.35)' }}>
+            {subtitle}
+          </p>
         )}
       </div>
 
-      {/* Edge highlight line */}
-      <div className="absolute top-0 left-0 right-0 h-px bg-white/10" />
-      <div className="absolute bottom-0 left-0 right-0 h-[3px] opacity-30"
+      {/* Bottom accent line */}
+      <div 
+        className="absolute bottom-0 left-0 right-0 h-[2px] opacity-0 group-hover:opacity-60 transition-opacity duration-500"
         style={{ background: `linear-gradient(90deg, transparent, ${c.text}, transparent)` }}
       />
     </motion.div>

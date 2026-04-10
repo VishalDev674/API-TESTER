@@ -7,7 +7,9 @@ export default function PingMatrix({ stressPings }) {
   const animFrameRef = useRef(null);
   const statesRef = useRef(new Array(PING_MATRIX.TOTAL).fill(0));
   const timestampsRef = useRef(new Array(PING_MATRIX.TOTAL).fill(0));
+  const pulseRef = useRef(new Array(PING_MATRIX.TOTAL).fill(0)); // Pulse intensity per node
   const rippleRef = useRef([]);
+  const [activeCount, setActiveCount] = useState(0);
 
   // Process incoming stress pings
   useEffect(() => {
@@ -16,17 +18,33 @@ export default function PingMatrix({ stressPings }) {
     if (index >= 0 && index < PING_MATRIX.TOTAL) {
       statesRef.current[index] = success ? 1 : 2;
       timestampsRef.current[index] = Date.now();
-      rippleRef.current.push({ x: 0, y: 0, index, time: Date.now(), color: success ? COLORS.green : COLORS.red });
+      pulseRef.current[index] = 1.0; // Full pulse intensity
+      rippleRef.current.push({ 
+        x: 0, y: 0, index, time: Date.now(), 
+        color: success ? COLORS.green : COLORS.red 
+      });
     }
   }, [stressPings]);
 
-  const getColor = useCallback((state, age) => {
-    const fadeAlpha = Math.max(0.2, 1 - age / 6000);
+  const getColor = useCallback((state, age, pulseIntensity) => {
+    const fadeAlpha = Math.max(0.15, 1 - age / 5000);
+    const pulse = 0.6 + Math.sin(Date.now() * 0.005 + pulseIntensity * 10) * 0.4;
+    
     switch (state) {
-      case 1: return `rgba(167, 239, 158, ${fadeAlpha})`; // primary green - success
-      case 2: return `rgba(255, 77, 77, ${fadeAlpha})`;   // terminal red - failure
-      case 3: return `rgba(57, 255, 20, ${fadeAlpha})`;   // vibrant green - healing
-      default: return 'rgba(167, 239, 158, 0.05)';        // idle (faint green)
+      case 1: { // 200 OK — Neon Green
+        const a = fadeAlpha * pulse;
+        return `rgba(0, 255, 65, ${a})`;
+      }
+      case 2: { // 500 Error — Cyber Red
+        const a = fadeAlpha * pulse;
+        return `rgba(255, 10, 60, ${a})`;
+      }
+      case 3: { // Healing — Electric Purple
+        const a = fadeAlpha * pulse;
+        return `rgba(191, 90, 242, ${a})`;
+      }
+      default: // Idle — dim ghost green
+        return 'rgba(0, 255, 65, 0.04)';
     }
   }, []);
 
@@ -51,6 +69,8 @@ export default function PingMatrix({ stressPings }) {
     // Clear
     ctx.clearRect(0, 0, width, height);
 
+    let active = 0;
+
     // Draw dots
     for (let i = 0; i < PING_MATRIX.TOTAL; i++) {
       const col = i % COLS;
@@ -60,44 +80,57 @@ export default function PingMatrix({ stressPings }) {
       const state = statesRef.current[i];
       const age = now - timestampsRef.current[i];
 
+      // Decay pulse
+      if (pulseRef.current[i] > 0) {
+        pulseRef.current[i] = Math.max(0, pulseRef.current[i] - 0.008);
+      }
+
       // Fade out after 8 seconds
       if (state !== 0 && age > 8000) {
         statesRef.current[i] = 0;
       }
 
-      const color = getColor(state, age);
+      if (state !== 0) active++;
 
-      // Draw dot with rounded rect
+      const color = getColor(state, age, pulseRef.current[i]);
+
+      // Draw dot as rounded rect
       ctx.beginPath();
       ctx.roundRect(x, y, DOT_SIZE, DOT_SIZE, 2);
       ctx.fillStyle = color;
       ctx.fill();
 
-      // Glow effect for active dots
-      if (state !== 0 && age < 2000) {
-        ctx.shadowColor = color;
-        ctx.shadowBlur = 8;
-        ctx.beginPath();
-        ctx.roundRect(x, y, DOT_SIZE, DOT_SIZE, 2);
-        ctx.fill();
-        ctx.shadowBlur = 0;
+      // Pulsing glow for active + recently triggered nodes
+      if (state !== 0 && age < 3000) {
+        const glowIntensity = pulseRef.current[i];
+        if (glowIntensity > 0.1) {
+          ctx.shadowColor = state === 1 ? '#00ff41' : state === 2 ? '#ff0a3c' : '#bf5af2';
+          ctx.shadowBlur = 12 * glowIntensity;
+          ctx.beginPath();
+          ctx.roundRect(x, y, DOT_SIZE, DOT_SIZE, 2);
+          ctx.fill();
+          ctx.shadowBlur = 0;
+        }
       }
     }
+
+    setActiveCount(active);
 
     // Draw ripple effects
     rippleRef.current = rippleRef.current.filter(r => {
       const age = now - r.time;
-      if (age > 600) return false;
+      if (age > 800) return false;
       const col = r.index % COLS;
       const row = Math.floor(r.index / COLS);
       const cx = DOT_GAP + col * cellSize + DOT_SIZE / 2;
       const cy = DOT_GAP + row * cellSize + DOT_SIZE / 2;
-      const radius = (age / 600) * 20;
-      const alpha = 1 - age / 600;
+      const radius = (age / 800) * 25;
+      const alpha = 1 - age / 800;
+      
       ctx.beginPath();
       ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-      ctx.strokeStyle = r.color.replace('1)', `${alpha * 0.3})`).replace('rgb', 'rgba');
-      ctx.lineWidth = 1;
+      ctx.strokeStyle = `${r.color}${Math.floor(alpha * 0.25 * 255).toString(16).padStart(2, '0')}`;
+      ctx.lineWidth = 1.5;
       ctx.stroke();
       return true;
     });
@@ -114,33 +147,37 @@ export default function PingMatrix({ stressPings }) {
 
   return (
     <motion.div
-      className="glass-card clipped-corner p-8"
+      className="glass-card p-8"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, delay: 0.3 }}
     >
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h3 className="text-sm font-bold text-white tracking-[0.3em] uppercase mb-1">SYSTEM TELEMETRY</h3>
-          <p className="text-[10px] text-white/30 font-mono tracking-tighter uppercase">Ping Matrix: 500 Active Nodes</p>
+      <div className="flex items-center justify-between mb-7">
+        <div className="section-header">
+          <h3 className="text-sm font-bold text-white tracking-[0.3em] uppercase mb-1">
+            THE MATRIX
+          </h3>
+          <p className="text-[10px] font-mono tracking-tight uppercase" style={{ color: 'rgba(255,255,255,0.25)' }}>
+            {PING_MATRIX.TOTAL} API Nodes • {activeCount} Active
+          </p>
         </div>
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-2.5">
-            <div className="w-1.5 h-1.5 rounded-full shadow-[0_0_8px_rgba(167,239,158,0.4)]" style={{ background: COLORS.green }} />
-            <span className="text-[9px] font-bold font-mono text-white/40 uppercase tracking-widest">OK</span>
+            <div className="w-2 h-2 rounded-sm" style={{ background: '#00ff41', boxShadow: '0 0 8px rgba(0,255,65,0.5)' }} />
+            <span className="text-[9px] font-bold font-mono tracking-widest uppercase" style={{ color: 'rgba(255,255,255,0.35)' }}>200 OK</span>
           </div>
           <div className="flex items-center gap-2.5">
-            <div className="w-1.5 h-1.5 rounded-full shadow-[0_0_8px_rgba(255,77,77,0.4)]" style={{ background: COLORS.red }} />
-            <span className="text-[9px] font-bold font-mono text-white/40 uppercase tracking-widest">FAIL</span>
+            <div className="w-2 h-2 rounded-sm" style={{ background: '#ff0a3c', boxShadow: '0 0 8px rgba(255,10,60,0.5)' }} />
+            <span className="text-[9px] font-bold font-mono tracking-widest uppercase" style={{ color: 'rgba(255,255,255,0.35)' }}>500 ERR</span>
           </div>
           <div className="flex items-center gap-2.5">
-            <div className="w-1.5 h-1.5 rounded-full shadow-[0_0_8px_rgba(57,255,20,0.4)]" style={{ background: COLORS.green }} />
-            <span className="text-[9px] font-bold font-mono text-white/40 uppercase tracking-widest">HEAL</span>
+            <div className="w-2 h-2 rounded-sm" style={{ background: '#bf5af2', boxShadow: '0 0 8px rgba(191,90,242,0.5)' }} />
+            <span className="text-[9px] font-bold font-mono tracking-widest uppercase" style={{ color: 'rgba(255,255,255,0.35)' }}>HEAL</span>
           </div>
         </div>
       </div>
 
-      <div className="ping-matrix-container p-6 flex justify-center bg-black/50 border border-white/5 shadow-inner">
+      <div className="ping-matrix-container p-6 flex justify-center">
         <canvas ref={canvasRef} />
       </div>
     </motion.div>

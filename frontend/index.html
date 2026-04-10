@@ -7,12 +7,28 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Shadow API Tester — AI-powered self-healing API testing platform with 500-user stress simulation" />
-    <meta name="theme-color" content="#0a0a0f" />
+    <meta name="description" content="Shadow API Tester — AI-powered self-healing API testing platform with 500-user stress simulation and cyberpunk dashboard" />
+    <meta name="theme-color" content="#0a0a0a" />
     <title>SHADOW API | Autonomous Testing Engine</title>
     <style>
-      body { background: #060609; }
+      body { 
+        background: #0a0a0a; 
+        margin: 0;
+        padding: 0;
+      }
       #root { min-height: 100vh; }
+      /* Prevent FOUC */
+      body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background: #0a0a0a;
+        z-index: 99999;
+        animation: fadeOut 0.5s 0.3s forwards;
+      }
+      @keyframes fadeOut {
+        to { opacity: 0; pointer-events: none; }
+      }
     </style>
   </head>
   <body>
