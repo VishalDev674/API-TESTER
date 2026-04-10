@@ -114,6 +114,15 @@ async def get_mock_products(
     })
 
 
+@router.get("/broken")
+async def get_mock_broken():
+    """Consistently broken API to test detection and self-healing flow."""
+    raise HTTPException(
+        status_code=500, 
+        detail="CRITICAL_FAILURE: Database connection pool exhausted. Sector 7G overflow."
+    )
+
+
 @router.get("/health")
 async def mock_health():
     """Health check for mock API."""
