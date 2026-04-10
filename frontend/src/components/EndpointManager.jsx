@@ -155,8 +155,8 @@ export default function EndpointManager() {
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                <div className="space-y-1.5">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+                <div className="space-y-1.5 md:col-span-1">
                   <label className="text-[9px] font-mono text-white/40 uppercase tracking-widest ml-1">Method</label>
                   <select
                     className="input-shadow focus:border-neon-green/50 cursor-pointer"
@@ -170,7 +170,7 @@ export default function EndpointManager() {
                     <option value="DELETE">DELETE</option>
                   </select>
                 </div>
-                <div className="space-y-1.5">
+                <div className="space-y-1.5 md:col-span-1">
                   <label className="text-[9px] font-mono text-white/40 uppercase tracking-widest ml-1">Assertion.Code</label>
                   <input
                     className="input-shadow focus:border-neon-green/50"
@@ -180,13 +180,16 @@ export default function EndpointManager() {
                     onChange={(e) => setForm({ ...form, expected_status: parseInt(e.target.value) })}
                   />
                 </div>
-                <div className="flex items-end gap-3">
-                  <button type="submit" className="btn-neon flex-1 text-[10px] font-bold py-3 transition-all hover:scale-[1.02]">
-                    {editingId ? 'ESTABLISH_LINK' : 'COMMIT_NODE'}
+                <div className="flex items-end gap-3 min-w-0 md:col-span-2">
+                  <button 
+                    type="submit" 
+                    className="btn-neon flex-1 text-[10px] font-bold py-3 px-2 whitespace-nowrap transition-all hover:scale-[1.02]"
+                  >
+                    {editingId ? 'ESTABLISH_LINK' : 'COMMIT NODE'}
                   </button>
                   <button
                     type="button"
-                    className="btn-neon btn-danger text-[10px] px-5 py-3 font-bold transition-all hover:scale-[1.02]"
+                    className="btn-neon btn-danger text-[10px] px-4 py-3 font-bold whitespace-nowrap transition-all hover:scale-[1.02]"
                     onClick={() => { setShowForm(false); setEditingId(null); }}
                   >
                     ABORT
