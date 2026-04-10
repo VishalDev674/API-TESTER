@@ -131,3 +131,94 @@ async def stop_worker():
     """Stop the shadow worker."""
     await shadow_worker.stop()
     return {"status": "stopped"}
+
+
+@router.get("/analytics")
+async def get_analytics(
+    hours: int = Query(24, ge=1, le=168),
+    buckets: int = Query(30, ge=6, le=100),
+    db: AsyncSession = Depends(get_db),
+):
+    """Get time-series analytics data for charts."""
+    now = datetime.now(timezone.utc)
+    start_time = now - timedelta(hours=hours)
+    bucket_seconds = (hours * 3600) / buckets
+
+    # Fetch all pings in the time range
+    result = await db.execute(
+        select(
+            PingResult.created_at,
+            PingResult.response_time_ms,
+            PingResult.success,
+            PingResult.status_code,
+            PingResult.endpoint_id,
+        )
+        .where(PingResult.created_at >= start_time)
+        .order_by(PingResult.created_at.asc())
+    )
+    rows = result.all()
+
+    # Build time buckets
+    timeline = []
+    for i in range(buckets):
+        bucket_start = start_time + timedelta(seconds=i * bucket_seconds)
+        bucket_end = start_time + timedelta(seconds=(i + 1) * bucket_seconds)
+
+        bucket_pings = [
+            r for r in rows
+            if bucket_start <= (r.created_at.replace(tzinfo=timezone.utc) if r.created_at.tzinfo is None else r.created_at) < bucket_end
+        ]
+
+        total = len(bucket_pings)
+        successes = sum(1 for p in bucket_pings if p.success)
+        failures = total - successes
+        response_times = [p.response_time_ms for p in bucket_pings if p.response_time_ms is not None]
+        avg_ms = round(sum(response_times) / len(response_times), 2) if response_times else 0
+        min_ms = round(min(response_times), 2) if response_times else 0
+        max_ms = round(max(response_times), 2) if response_times else 0
+        p95_ms = 0
+        if response_times:
+            sorted_rt = sorted(response_times)
+            p95_idx = int(len(sorted_rt) * 0.95)
+            p95_ms = round(sorted_rt[min(p95_idx, len(sorted_rt) - 1)], 2)
+
+        timeline.append({
+            "time": bucket_start.isoformat(),
+            "label": bucket_start.strftime("%H:%M"),
+            "total": total,
+            "success": successes,
+            "failure": failures,
+            "avg_ms": avg_ms,
+            "min_ms": min_ms,
+            "max_ms": max_ms,
+            "p95_ms": p95_ms,
+            "success_rate": round((successes / total * 100), 1) if total > 0 else 100,
+        })
+
+    # Per-endpoint summary
+    endpoint_ids = set(r.endpoint_id for r in rows)
+    endpoints_summary = []
+    for eid in endpoint_ids:
+        ep_pings = [r for r in rows if r.endpoint_id == eid]
+        ep_rts = [p.response_time_ms for p in ep_pings if p.response_time_ms is not None]
+        ep_name_result = await db.execute(
+            select(APIEndpoint.name).where(APIEndpoint.id == eid)
+        )
+        ep_name = ep_name_result.scalar() or f"Endpoint #{eid}"
+        endpoints_summary.append({
+            "id": eid,
+            "name": ep_name,
+            "total_pings": len(ep_pings),
+            "success_count": sum(1 for p in ep_pings if p.success),
+            "avg_ms": round(sum(ep_rts) / len(ep_rts), 2) if ep_rts else 0,
+        })
+
+    return {
+        "timeline": timeline,
+        "endpoints": sorted(endpoints_summary, key=lambda x: x["total_pings"], reverse=True),
+        "period_hours": hours,
+        "total_pings": len(rows),
+        "overall_success_rate": round(
+            sum(1 for r in rows if r.success) / len(rows) * 100, 1
+        ) if rows else 100,
+    }
