@@ -7,6 +7,7 @@ import EndpointManager from './components/EndpointManager';
 import HealTimeline from './components/HealTimeline';
 import SystemMonitor from './components/SystemMonitor';
 import StressControl from './components/StressControl';
+import AnalyticsGraph from './components/AnalyticsGraph';
 import useWebSocket from './hooks/useWebSocket';
 import useStats from './hooks/useStats';
 
@@ -78,6 +79,11 @@ export default function App() {
       {/* Bento Grid Stats */}
       <section className="mb-10">
         <BentoGrid stats={stats} />
+      </section>
+
+      {/* Performance Analytics Graph */}
+      <section className="mb-10">
+        <AnalyticsGraph />
       </section>
 
       {/* Main Dashboard Grid */}

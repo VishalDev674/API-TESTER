@@ -80,6 +80,12 @@ const api = {
     const res = await fetch(`${API_BASE}/api/stress/stop`, { method: 'POST' });
     return res.json();
   },
+
+  // Analytics
+  async getAnalytics(hours = 24, buckets = 30) {
+    const res = await fetch(`${API_BASE}/api/dashboard/analytics?hours=${hours}&buckets=${buckets}`);
+    return res.json();
+  },
 };
 
 export default api;
