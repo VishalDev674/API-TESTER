@@ -12,7 +12,7 @@ from services.shadow_worker import shadow_worker
 from services.rate_limiter import rate_limiter
 from services.ai_engine import ai_engine
 from services.websocket_manager import ws_manager
-from routers import api_endpoints, dashboard, ws
+from routers import api_endpoints, dashboard, ws, orchestrator
 from mock_api import router as mock_router
 from sqlalchemy import select
 
@@ -123,6 +123,7 @@ app.include_router(api_endpoints.router)
 app.include_router(dashboard.router)
 # Stress router removed — replaced by Incident Response panel
 app.include_router(ws.router)
+app.include_router(orchestrator.router)
 
 
 @app.get("/")
