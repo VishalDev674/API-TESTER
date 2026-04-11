@@ -8,6 +8,7 @@ import HealTimeline from './components/HealTimeline';
 import SystemMonitor from './components/SystemMonitor';
 import IncidentResponse from './components/IncidentResponse';
 import AnalyticsGraph from './components/AnalyticsGraph';
+import TacticalMap from './components/TacticalMap';
 import ManualAlertBanner from './components/ManualAlertBanner';
 import useWebSocket from './hooks/useWebSocket';
 import useStats from './hooks/useStats';
@@ -120,6 +121,11 @@ export default function App() {
       {/* Bento Grid Stats */}
       <section className="mb-8">
         <BentoGrid stats={stats} manualAlerts={manualAlerts} />
+      </section>
+
+      {/* Neural Orchestration & Tactical Map */}
+      <section className="mb-8 overflow-hidden">
+        <TacticalMap />
       </section>
 
       {/* Performance Analytics Graph */}
