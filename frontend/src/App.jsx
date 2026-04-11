@@ -25,6 +25,7 @@ export default function App() {
   });
   const [aiExpanded, setAiExpanded] = useState(false);
   const [manualAlerts, setManualAlerts] = useState([]);
+  const [notifications, setNotifications] = useState([]);
 
   const handleWSMessage = useCallback((msg) => {
     const { channel, data, timestamp } = msg;
@@ -60,10 +61,21 @@ export default function App() {
 
       case 'manual_alert':
         setManualAlerts((prev) => {
-          // Avoid duplicate alerts for the same endpoint
+          // Avoid duplicate alerts for the same endpoint in the banner
           const exists = prev.find((a) => a.endpoint_id === data.endpoint_id);
           if (exists) return prev;
-          return [...prev, { ...data, id: `${data.endpoint_id}-${Date.now()}` }];
+          const newAlert = { ...data, id: `${data.endpoint_id}-${Date.now()}` };
+          return [...prev, newAlert];
+        });
+        // Store in permanent history
+        setNotifications((prev) => {
+          const newNotif = { 
+            ...data, 
+            id: `${data.endpoint_id}-${Date.now()}`, 
+            time, 
+            read: false 
+          };
+          return [...prev, newNotif].slice(-100); // Keep last 100
         });
         break;
 
@@ -78,10 +90,30 @@ export default function App() {
     setManualAlerts((prev) => prev.filter((a) => a.id !== alertId));
   }, []);
 
+  const markAllRead = useCallback(() => {
+    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+  }, []);
+
+  const clearNotifications = useCallback(() => {
+    setNotifications([]);
+  }, []);
+
+  const clearOneNotification = useCallback((id) => {
+    setNotifications(prev => prev.filter(n => n.id !== id));
+  }, []);
+
   return (
     <>
     <ManualAlertBanner alerts={manualAlerts} onDismiss={dismissAlert} />
-    <Layout wsConnected={connected} stats={stats} systemMetrics={systemMetrics}>
+    <Layout 
+      wsConnected={connected} 
+      stats={stats} 
+      systemMetrics={systemMetrics}
+      notifications={notifications}
+      onMarkRead={markAllRead}
+      onClearAll={clearNotifications}
+      onClearOne={clearOneNotification}
+    >
       {/* Hero Section */}
       <Hero />
 

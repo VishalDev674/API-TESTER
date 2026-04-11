@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  AlertOctagon, X, Clock, Wrench, ExternalLink,
-  ShieldAlert, RadioTower,
+  AlertOctagon, X, Clock, ExternalLink,
+  RadioTower, Sparkles
 } from 'lucide-react';
+import api from '../lib/api';
 
 /**
  * ManualAlertBanner — Prominent alert that appears when the circuit breaker
@@ -27,6 +28,7 @@ export default function ManualAlertBanner({ alerts, onDismiss }) {
 
 function AlertCard({ alert, onDismiss }) {
   const [countdown, setCountdown] = useState(alert.cooldown_remaining_seconds || 0);
+  const [isResetting, setIsResetting] = useState(false);
 
   useEffect(() => {
     if (countdown <= 0) return;
@@ -40,7 +42,28 @@ function AlertCard({ alert, onDismiss }) {
       });
     }, 1000);
     return () => clearInterval(timer);
-  }, []);
+  }, [countdown]);
+
+  const handleReset = async () => {
+    try {
+      setIsResetting(true);
+      await api.resetCircuit(alert.endpoint_id);
+      // Dismiss the alert after successful reset
+      onDismiss(alert.id);
+      // Refresh endpoints to see the status change
+      window.dispatchEvent(new CustomEvent('refresh-endpoints'));
+    } catch (err) {
+      console.error('Failed to reset circuit:', err);
+    } finally {
+      setIsResetting(false);
+    }
+  };
+
+  const handleManualCheck = () => {
+    if (alert.endpoint_url) {
+      window.open(alert.endpoint_url, '_blank');
+    }
+  };
 
   const mins = Math.floor(countdown / 60);
   const secs = countdown % 60;
@@ -125,7 +148,7 @@ function AlertCard({ alert, onDismiss }) {
               />
             </div>
 
-            <p className="text-[13px] text-white/80 font-mono mb-3">
+            <p className="text-[13px] text-white/80 font-mono mb-4">
               Auto-healing failed for <span className="text-white font-bold">{alert.endpoint_name}</span> after{' '}
               <span className="text-red-400 font-bold">{alert.attempts_exhausted}</span> attempts.
               {alert.status_code && (
@@ -136,48 +159,61 @@ function AlertCard({ alert, onDismiss }) {
               )}
             </p>
 
-            {/* Action row */}
+            {/* Action row — The Three Functional Options */}
             <div className="flex items-center gap-4 flex-wrap">
-              {/* Cooldown timer */}
-              {countdown > 0 && (
-                <div
-                  className="flex items-center gap-2 text-[10px] font-mono px-3 py-1.5 rounded-md"
-                  style={{
-                    background: 'rgba(255, 214, 10, 0.06)',
-                    border: '1px solid rgba(255, 214, 10, 0.15)',
-                    color: '#ffd60a',
-                  }}
-                >
-                  <Clock size={12} />
-                  RETRY IN {mins}m {secs.toString().padStart(2, '0')}s
-                </div>
-              )}
-
-              {/* Failure type badge */}
-              <div
-                className="flex items-center gap-2 text-[10px] font-mono font-bold px-3 py-1.5 rounded-md uppercase"
+              {/* Option 1: Retry / Reset Circuit */}
+              <motion.button
+                onClick={handleReset}
+                disabled={isResetting}
+                className={`flex items-center gap-2 text-[10px] font-mono px-3 py-1.5 rounded-md transition-all ${
+                  isResetting ? 'opacity-50 cursor-wait' : 'hover:scale-[1.05] hover:brightness-125'
+                }`}
                 style={{
-                  background: 'rgba(255, 10, 60, 0.08)',
-                  border: '1px solid rgba(255, 10, 60, 0.15)',
-                  color: '#ff0a3c',
+                  background: 'rgba(255, 214, 10, 0.08)',
+                  border: '1px solid rgba(255, 214, 10, 0.25)',
+                  color: '#ffd60a',
+                  boxShadow: '0 0 10px rgba(255, 214, 10, 0.1)',
                 }}
+                whileHover={{ y: -1 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <Clock size={12} className={isResetting ? 'animate-spin' : ''} />
+                {isResetting ? 'RESETTING...' : (countdown > 0 ? `RETRY NOW (${mins}m ${secs.toString().padStart(2, '0')}s)` : 'RETRY NOW')}
+              </motion.button>
+
+              {/* Option 2: Diagnosis / Failure Type (Acts as a re-trigger) */}
+              <motion.button
+                onClick={handleReset} 
+                className="flex items-center gap-2 text-[10px] font-mono font-bold px-3 py-1.5 rounded-md uppercase hover:scale-[1.05] transition-all"
+                style={{
+                  background: 'rgba(255, 10, 60, 0.12)',
+                  border: '1px solid rgba(255, 10, 60, 0.25)',
+                  color: '#ff0a3c',
+                  boxShadow: '0 0 10px rgba(255, 10, 60, 0.1)',
+                }}
+                whileHover={{ y: -1 }}
+                whileTap={{ scale: 0.98 }}
               >
                 <RadioTower size={12} />
-                {alert.failure_type || 'UNKNOWN'}
-              </div>
+                {alert.failure_type || 'ANOMALY DETECTED'}
+              </motion.button>
 
-              {/* Manual fix suggestion */}
-              <div
-                className="flex items-center gap-2 text-[10px] font-mono px-3 py-1.5 rounded-md"
+              {/* Option 3: Manual Check (Opens URL) */}
+              <motion.button
+                onClick={handleManualCheck}
+                className="flex items-center gap-2 text-[10px] font-mono px-3 py-1.5 rounded-md hover:scale-[1.05] transition-all"
                 style={{
-                  background: 'rgba(0, 212, 255, 0.06)',
-                  border: '1px solid rgba(0, 212, 255, 0.15)',
+                  background: 'rgba(0, 212, 255, 0.08)',
+                  border: '1px solid rgba(0, 212, 255, 0.25)',
                   color: '#00d4ff',
+                  boxShadow: '0 0 10px rgba(0, 212, 255, 0.1)',
                 }}
+                whileHover={{ y: -1 }}
+                whileTap={{ scale: 0.98 }}
               >
-                <Wrench size={12} />
+                <ExternalLink size={12} />
                 CHECK ENDPOINT MANUALLY
-              </div>
+              </motion.button>
             </div>
           </div>
 

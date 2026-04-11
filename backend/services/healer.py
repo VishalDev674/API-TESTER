@@ -74,6 +74,12 @@ class AutoHealer:
             return max(0, remaining) if remaining > 0 else None
         return None
 
+    def reset_circuit_breaker(self, endpoint_id: int):
+        """Manually reset the circuit breaker for an endpoint."""
+        self._cooldowns.pop(endpoint_id, None)
+        self._heal_history.pop(endpoint_id, None)
+        self.active_heals.pop(endpoint_id, None)
+
     async def heal(
         self,
         db: AsyncSession,
@@ -102,6 +108,7 @@ class AutoHealer:
             await ws_manager.broadcast("manual_alert", {
                 "endpoint_id": endpoint_id,
                 "endpoint_name": endpoint.name,
+                "endpoint_url": endpoint.url,
                 "failure_type": failure_type,
                 "status_code": status_code,
                 "error_message": error_message,

@@ -30,6 +30,11 @@ const api = {
     return res.json();
   },
 
+  async resetCircuit(id) {
+    const res = await fetch(`${API_BASE}/api/endpoints/${id}/reset-circuit`, { method: 'POST' });
+    return res.json();
+  },
+
   // Dashboard
   async getStats() {
     const res = await fetch(`${API_BASE}/api/dashboard/stats`);

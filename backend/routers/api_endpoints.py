@@ -7,9 +7,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from database import get_db
 from models import APIEndpoint
 from schemas import EndpointCreate, EndpointUpdate, EndpointResponse
+from services.healer import auto_healer
 from typing import List
 
 router = APIRouter(prefix="/api/endpoints", tags=["Endpoints"])
+
+
+@router.post("/{endpoint_id}/reset-circuit")
+async def reset_circuit(endpoint_id: int):
+    """Manually reset the circuit breaker for an endpoint."""
+    auto_healer.reset_circuit_breaker(endpoint_id)
+    return {"status": "circuit reset", "endpoint_id": endpoint_id}
 
 
 @router.get("/", response_model=List[EndpointResponse])

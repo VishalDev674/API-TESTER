@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Activity, Shield, Cpu, Radio, Clock, Zap, Hexagon, Radar, Satellite } from 'lucide-react';
 import FaultyTerminal from './FaultyTerminal';
 import TelemetryBar from './TelemetryBar';
+import NotificationDrawer from './NotificationDrawer';
+import { Bell } from 'lucide-react';
 
 // ── Live Digital Clock ──────────────────────────────────
 function LiveClock() {
@@ -65,7 +67,19 @@ function LogoMark() {
   );
 }
 
-export default function Layout({ children, wsConnected, stats, systemMetrics }) {
+export default function Layout({ 
+  children, 
+  wsConnected, 
+  stats, 
+  systemMetrics,
+  notifications = [],
+  onMarkRead,
+  onClearAll,
+  onClearOne
+}) {
+  const [notifOpen, setNotifOpen] = useState(false);
+  const unreadCount = notifications.filter(n => !n.read).length;
+
   return (
     <div className="scanline-overlay min-h-screen relative overflow-hidden">
       {/* CRT Vignette Overlay */}
@@ -244,6 +258,40 @@ export default function Layout({ children, wsConnected, stats, systemMetrics }) 
                 ))}
               </div>
 
+               {/* Separator */}
+              <div className="hidden sm:block w-[1px] h-8 bg-white/5" />
+
+              {/* Notification Bell */}
+              <div className="relative">
+                <motion.button
+                  whileHover={{ scale: 1.1, y: -1 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setNotifOpen(true)}
+                  className="p-2.5 rounded-xl border border-white/5 hover:border-white/10 hover:bg-white/5 transition-all group"
+                  style={{
+                    background: 'rgba(0, 212, 255, 0.03)',
+                  }}
+                >
+                  <Bell size={20} className={`transition-colors ${unreadCount > 0 ? 'text-shadow-cyan' : 'text-white/40 group-hover:text-white'}`} />
+                  
+                  <AnimatePresence>
+                    {unreadCount > 0 && (
+                      <motion.div
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{ scale: 0, opacity: 0 }}
+                        className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1.5 rounded-full bg-shadow-cyan flex items-center justify-center border-2 border-[#0a0a0f]"
+                        style={{ boxShadow: '0 0 10px rgba(0, 212, 255, 0.4)' }}
+                      >
+                        <span className="text-[9px] font-black text-[#0a0a0f] leading-none">
+                          {unreadCount > 9 ? '9+' : unreadCount}
+                        </span>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.button>
+              </div>
+
               {/* Separator */}
               <div className="hidden sm:block w-[1px] h-8 bg-white/5" />
 
@@ -252,6 +300,16 @@ export default function Layout({ children, wsConnected, stats, systemMetrics }) 
             </motion.div>
           </div>
         </div>
+
+        {/* Notification Drawer */}
+        <NotificationDrawer 
+          isOpen={notifOpen}
+          onClose={() => setNotifOpen(false)}
+          notifications={notifications}
+          onMarkRead={onMarkRead}
+          onClearAll={onClearAll}
+          onClearOne={onClearOne}
+        />
 
         {/* Bottom accent line */}
         <div className="absolute bottom-0 left-0 right-0 h-[1px]" style={{
