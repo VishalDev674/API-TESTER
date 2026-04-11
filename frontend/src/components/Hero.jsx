@@ -305,14 +305,14 @@ export default function Hero() {
           </div>
 
           {/* ── Right Column: Live Stats + Status ── */}
-          <motion.div variants={itemVariants} className="shrink-0 w-full lg:w-[340px] space-y-5">
+          <motion.div variants={itemVariants} className="shrink-0 w-full lg:w-[440px] space-y-6">
 
             {/* Live stats cards */}
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-3 gap-4">
               {stats.map((stat, i) => (
                 <motion.div
                   key={stat.label}
-                  className="text-center p-4 rounded-xl relative overflow-hidden group"
+                  className="text-center p-5 rounded-xl relative overflow-hidden group"
                   style={{
                     background: 'rgba(255,255,255,0.02)',
                     border: '1px solid rgba(255,255,255,0.04)',
@@ -320,11 +320,11 @@ export default function Hero() {
                   whileHover={{ borderColor: 'rgba(0, 255, 65, 0.15)', y: -2 }}
                   transition={{ type: 'spring', stiffness: 300 }}
                 >
-                  <stat.icon size={14} className="mx-auto mb-2 text-white/20 group-hover:text-neon-green/50 transition-colors" />
-                  <div className="text-xl font-black text-white" style={{ fontFamily: "'Sora', sans-serif" }}>
+                  <stat.icon size={18} className="mx-auto mb-3 text-white/20 group-hover:text-neon-green/50 transition-colors" />
+                  <div className="text-2xl font-black text-white" style={{ fontFamily: "'Sora', sans-serif" }}>
                     <AnimatedNumber target={stat.value} suffix={stat.suffix} duration={2000 + i * 500} />
                   </div>
-                  <div className="text-[8px] font-mono text-white/25 uppercase tracking-wider mt-1">
+                  <div className="text-[9px] font-mono text-white/25 uppercase tracking-wider mt-1.5">
                     {stat.label}
                   </div>
                 </motion.div>
@@ -333,7 +333,7 @@ export default function Hero() {
 
             {/* Tactical panel */}
             <div
-              className="p-5 rounded-xl relative overflow-hidden"
+              className="p-6 rounded-xl relative overflow-hidden"
               style={{
                 background: 'linear-gradient(180deg, rgba(0,0,0,0.5), rgba(0,0,0,0.3))',
                 border: '1px solid rgba(0, 255, 65, 0.06)',
@@ -341,25 +341,25 @@ export default function Hero() {
               }}
             >
               {/* Corner accents */}
-              <div className="absolute top-0 left-0 w-4 h-4 border-t border-l border-neon-green/20" />
-              <div className="absolute top-0 right-0 w-4 h-4 border-t border-r border-neon-green/20" />
-              <div className="absolute bottom-0 left-0 w-4 h-4 border-b border-l border-neon-green/20" />
-              <div className="absolute bottom-0 right-0 w-4 h-4 border-b border-r border-neon-green/20" />
+              <div className="absolute top-0 left-0 w-5 h-5 border-t border-l border-neon-green/20" />
+              <div className="absolute top-0 right-0 w-5 h-5 border-t border-r border-neon-green/20" />
+              <div className="absolute bottom-0 left-0 w-5 h-5 border-b border-l border-neon-green/20" />
+              <div className="absolute bottom-0 right-0 w-5 h-5 border-b border-r border-neon-green/20" />
 
-              <div className="flex justify-between items-end mb-5 pb-3 border-b border-white/5">
+              <div className="flex justify-between items-end mb-6 pb-4 border-b border-white/5">
                 <div>
-                  <div className="text-[9px] font-mono text-white/25 uppercase tracking-[0.3em]">System Status</div>
-                  <div className="text-[13px] font-black text-neon-green tracking-tight text-glow-green mt-0.5">
+                  <div className="text-[10px] font-mono text-white/25 uppercase tracking-[0.3em]">System Status</div>
+                  <div className="text-[15px] font-black text-neon-green tracking-tight text-glow-green mt-1">
                     ALL SYSTEMS NOMINAL
                   </div>
                 </div>
-                <div className="flex gap-[3px] items-end h-4">
-                  {[...Array(5)].map((_, i) => (
+                <div className="flex gap-[3px] items-end h-5">
+                  {[...Array(6)].map((_, i) => (
                     <motion.div
                       key={i}
-                      className="w-[3px] bg-neon-green rounded-sm"
+                      className="w-[4px] bg-neon-green rounded-sm"
                       animate={{ 
-                        height: [4 + i * 2, 12 + i, 6 + i * 2, 14, 8 + i] 
+                        height: [5 + i * 2, 14 + i, 7 + i * 2, 18, 9 + i] 
                       }}
                       transition={{ duration: 1.2, repeat: Infinity, repeatType: 'reverse', delay: i * 0.08 }}
                     />
@@ -367,7 +367,7 @@ export default function Hero() {
                 </div>
               </div>
 
-              <div className="space-y-2.5">
+              <div className="space-y-3.5">
                 <StatusRow label="Core Matrix" value="ONLINE" dot="#00ff41" />
                 <StatusRow label="Neural Link" value="SYNCED" dot="#00d4ff" />
                 <StatusRow label="Shadow Worker" value="ACTIVE" dot="#00ff41" />
@@ -375,12 +375,12 @@ export default function Hero() {
               </div>
 
               {/* Signal bar */}
-              <div className="mt-5 pt-4 border-t border-white/5">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[8px] font-mono text-white/20 uppercase tracking-widest">Signal</span>
-                  <span className="text-[10px] font-mono font-bold text-neon-green/60">98.4%</span>
+              <div className="mt-6 pt-5 border-t border-white/5">
+                <div className="flex items-center justify-between mb-2.5">
+                  <span className="text-[9px] font-mono text-white/20 uppercase tracking-widest">Signal</span>
+                  <span className="text-[11px] font-mono font-bold text-neon-green/60">98.4%</span>
                 </div>
-                <div className="h-[3px] bg-white/5 rounded-full overflow-hidden">
+                <div className="h-[4px] bg-white/5 rounded-full overflow-hidden">
                   <motion.div
                     className="h-full rounded-full"
                     style={{
@@ -439,13 +439,13 @@ function FeaturePill({ icon: Icon, label, color }) {
 function StatusRow({ label, value, dot }) {
   return (
     <div className="flex justify-between items-center group cursor-default">
-      <div className="flex items-center gap-2">
-        <div className="w-[5px] h-[5px] rounded-full animate-pulse" style={{ background: dot, boxShadow: `0 0 6px ${dot}` }} />
-        <span className="text-[10px] font-mono text-white/35 group-hover:text-white/55 transition-colors uppercase tracking-tight">
+      <div className="flex items-center gap-2.5">
+        <div className="w-[6px] h-[6px] rounded-full animate-pulse" style={{ background: dot, boxShadow: `0 0 8px ${dot}` }} />
+        <span className="text-[11px] font-mono text-white/35 group-hover:text-white/55 transition-colors uppercase tracking-tight">
           {label}
         </span>
       </div>
-      <span className="text-[10px] font-mono font-black uppercase" style={{ color: dot }}>
+      <span className="text-[11px] font-mono font-black uppercase" style={{ color: dot }}>
         {value}
       </span>
     </div>
